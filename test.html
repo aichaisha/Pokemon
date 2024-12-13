@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokemon Search</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+        form {
+            margin-top: 50px;
+        }
+        #pokemon-details {
+            margin-top: 20px;
+        }
+        img {
+            max-width: 150px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pokemon Search</h1>
+    <form id="search-form">
+        <input type="text" id="pokemonQuery" placeholder="Enter Pokemon ID or Name" required>
+        <button type="submit">Search</button>
+    </form>
+
+    <div id="pokemon-details"></div>
+    <canvas id="experienceChart" width="400" height="200"></canvas>
+
+    <script>
+        document.getElementById('search-form').addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent form submission from reloading the page
+
+            const query = document.getElementById('pokemonQuery').value.trim();
+            if (!query) {
+                alert('Please enter a Pokemon ID or Name');
+                return;
+            }
+
+            try {
+                const response = await fetch('http://localhost:3000/api/pokemon', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query }), // Send the name or ID as JSON
+                });
+
+                if (!response.ok) {
+                    throw new Error('Pokemon not found.');
+                }
+
+                const pokemon = await response.json();
+                displayPokemon(pokemon);
+            } catch (error) {
+                document.getElementById('pokemon-details').innerHTML = `<p style="color: red;">${error.message}</p>`;
+            }
+        });
+
+        function displayPokemon(pokemon) {
+            const detailsContainer = document.getElementById('pokemon-details');
+            detailsContainer.innerHTML = `
+                <h2>${pokemon.name.toUpperCase()}</h2>
+                <img src="${pokemon.sprite}" alt="${pokemon.name}">
+                <p><strong>ID:</strong> ${pokemon.id}</p>
+                <p><strong>Type:</strong> ${pokemon.type.join(', ')}</p>
+                <p><strong>Abilities:</strong> ${pokemon.abilities.join(', ')}</p>
+                <p><strong>Base Experience:</strong> ${pokemon.base_experience}</p>
+                <p><strong>Height:</strong> ${pokemon.height}</p>
+                <p><strong>Weight:</strong> ${pokemon.weight}</p>
+            `;
+        }
+
+
+        
+    </script>
+</body>
+</html>
